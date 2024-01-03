@@ -16,17 +16,19 @@ def request_capitalize_my_title(title_input):
         "X-RapidAPI-Host": "capitalize-my-title.p.rapidapi.com",
     }
 
-    response = requests.get(url, headers=headers)
-
-    if response.json()["status"] != "success":
-        print("Error: " + response.json()["message"])  # TODO 异常处理很不完善
-    else:
+    try:
+        response = requests.get(url, headers=headers)
         title_output = response.json()["data"]["output"]
         return title_output
+    except Exception as e:
+        print("\033[1;31m" + "Error: " + str(e) + "\033[0m")
+        return None
 
 
 def add_braces(input_string):
     """splitting a string into words, checking if each word starts with a capital letter, and then wrapping those specific words with curly braces {}."""
+    if not input_string:
+        return None
     words = input_string.split()
 
     processed_words = []
@@ -53,10 +55,12 @@ def process_bib_file(file_path):
     for title in titles:
         title = title.replace("{", "").replace("}", "")  # 去除原有的大括号
         print(f"Before: {title}")
-        if '/' in title:
-            continue  # TODO 处理标题中含有斜杠的情况
-        # processed_title = add_braces(title)
+
         processed_title = add_braces(request_capitalize_my_title(title))
+        if not processed_title:
+            print("\n")
+            continue
+
         print(f"After : {processed_title}\n")
         bib_data = bib_data.replace(title, processed_title)
         time.sleep(1)  # api 调用频率限制
@@ -71,7 +75,6 @@ def process_bib_file(file_path):
 if __name__ == "__main__":
     # title_input = "Analysis and observations from the first amazon picking challenge"
     # title_input = "A new technique for fully autonomous and efficient 3 d robotics hand/eye calibration"
-    # breakpoint()
     # request_capitalize_my_title(title_input)
 
     file_path = "refs.bib"
