@@ -11,7 +11,6 @@ api_key = os.getenv("API_KEY")
 
 def request_capitalize_my_title(title_input):
     url = "https://capitalize-my-title.p.rapidapi.com/title/" + title_input
-
     headers = {
         "X-RapidAPI-Key": api_key,
         "X-RapidAPI-Host": "capitalize-my-title.p.rapidapi.com",
@@ -45,7 +44,6 @@ def process_bib_file(file_path):
     # 读取 bib 文件内容
     with open(file_path, "r") as file:
         bib_data = file.read()
-    breakpoint()
 
     # 使用正则表达式提取标题部分
     pattern = r"\n\s*title\s*=\s*{(.*?)}[^}]*(?=\n\s*\S|\Z)"
@@ -53,8 +51,10 @@ def process_bib_file(file_path):
 
     # 处理并替换标题部分
     for title in titles:
-        title = title.replace("{", "").replace("}", "")  # TODO 可以不用去除原有的大括号？
+        title = title.replace("{", "").replace("}", "")  # 去除原有的大括号
         print(f"Before: {title}")
+        if '/' in title:
+            continue  # TODO 处理标题中含有斜杠的情况
         # processed_title = add_braces(title)
         processed_title = add_braces(request_capitalize_my_title(title))
         print(f"After : {processed_title}\n")
@@ -70,7 +70,9 @@ def process_bib_file(file_path):
 
 if __name__ == "__main__":
     # title_input = "Analysis and observations from the first amazon picking challenge"
-    # title_input = "Modeling kinect sensor noise for improved 3d reconstruction and tracking"
+    # title_input = "A new technique for fully autonomous and efficient 3 d robotics hand/eye calibration"
+    # breakpoint()
+    # request_capitalize_my_title(title_input)
 
     file_path = "refs.bib"
     process_bib_file(file_path)
